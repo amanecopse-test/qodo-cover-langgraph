@@ -5,7 +5,7 @@ from pydantic import BaseModel, Field
 
 class SingleTest(BaseModel):
     """Model for a single test case.
-    
+
     Example:
         ```python
         test = SingleTest(
@@ -18,17 +18,30 @@ class SingleTest(BaseModel):
         )
         ```
     """
-    test_behavior: str = Field(description="Short description of the behavior the test covers")
-    lines_to_cover: str = Field(description="A list of line numbers, currently uncovered, that this specific new test aims to cover")
-    test_name: str = Field(description="A short test name, in snake case, that reflects the behaviour to test")
-    test_code: str = Field(description="A new test function that extends the existing test suite, and tests the behavior described in 'test_behavior'")
-    new_imports_code: str = Field(description="New imports that are required to run the new test function")
-    test_tags: str = Field(description="A single label that best describes the test, out of: ['happy path', 'edge case','other']")
+
+    test_behavior: str = Field(
+        description="Short description of the behavior the test covers"
+    )
+    lines_to_cover: str = Field(
+        description="A list of line numbers, currently uncovered, that this specific new test aims to cover"
+    )
+    test_name: str = Field(
+        description="A short test name, in snake case, that reflects the behaviour to test"
+    )
+    test_code: str = Field(
+        description="A new test function that extends the existing test suite, and tests the behavior described in 'test_behavior'"
+    )
+    new_imports_code: str = Field(
+        description="New imports that are required to run the new test function"
+    )
+    test_tags: str = Field(
+        description="A single label that best describes the test, out of: ['happy path', 'edge case','other']"
+    )
 
 
 class NewTests(BaseModel):
     """Model for new test cases.
-    
+
     Example:
         ```python
         tests = NewTests(
@@ -47,14 +60,20 @@ class NewTests(BaseModel):
         )
         ```
     """
+
     language: str = Field(description="The programming language of the source code")
-    existing_test_function_signature: str = Field(description="A single line repeating a signature header of one of the existing test functions")
-    new_tests: List[SingleTest] = Field(min_items=1, description="A list of new test functions to append to the existing test suite")
+    existing_test_function_signature: str = Field(
+        description="A single line repeating a signature header of one of the existing test functions"
+    )
+    new_tests: List[SingleTest] = Field(
+        min_items=1,
+        description="A list of new test functions to append to the existing test suite",
+    )
 
 
 class AdaptedTestCommand(BaseModel):
     """Model for adapted test command.
-    
+
     Example:
         ```python
         command = AdaptedTestCommand(
@@ -63,13 +82,16 @@ class AdaptedTestCommand(BaseModel):
         )
         ```
     """
+
     adapted_command: str = Field(description="The adapted command to run a single test")
-    explanation: str = Field(description="An explanation of how the command was adapted")
+    explanation: str = Field(
+        description="An explanation of how the command was adapted"
+    )
 
 
 class TestHeadersIndentation(BaseModel):
     """Model for test headers indentation analysis.
-    
+
     Example:
         ```python
         analysis = TestHeadersIndentation(
@@ -79,14 +101,21 @@ class TestHeadersIndentation(BaseModel):
         )
         ```
     """
-    test_headers: List[str] = Field(description="A list of test headers found in the test file")
-    indentation_levels: List[int] = Field(description="A list of indentation levels for each test header")
-    explanation: str = Field(description="An explanation of the indentation pattern found in the test file")
+
+    test_headers: List[str] = Field(
+        description="A list of test headers found in the test file"
+    )
+    indentation_levels: List[int] = Field(
+        description="A list of indentation levels for each test header"
+    )
+    explanation: str = Field(
+        description="An explanation of the indentation pattern found in the test file"
+    )
 
 
 class TestsAnalysis(BaseModel):
     """Model for test suite analysis.
-    
+
     Example:
         ```python
         analysis = TestsAnalysis(
@@ -98,16 +127,23 @@ class TestsAnalysis(BaseModel):
         )
         ```
     """
+
     language: str = Field(description="The programming language used by the test file")
-    testing_framework: str = Field(description="The testing framework needed to run the tests in the test file")
+    testing_framework: str = Field(
+        description="The testing framework needed to run the tests in the test file"
+    )
     number_of_tests: int = Field(description="The number of tests in the test file")
-    relevant_line_number_to_insert_tests_after: int = Field(description="The line number in the test file, after which the new tests should be inserted")
-    relevant_line_number_to_insert_imports_after: int = Field(description="The line number in the test file, after which new imports should be inserted")
+    relevant_line_number_to_insert_tests_after: int = Field(
+        description="The line number in the test file, after which the new tests should be inserted"
+    )
+    relevant_line_number_to_insert_imports_after: int = Field(
+        description="The line number in the test file, after which new imports should be inserted"
+    )
 
 
 class TestAnalysis(BaseModel):
     """Model for test analysis against context.
-    
+
     Example:
         ```python
         analysis = TestAnalysis(
@@ -117,14 +153,21 @@ class TestAnalysis(BaseModel):
         )
         ```
     """
-    is_valid: bool = Field(description="Whether the test code is valid against the context")
-    explanation: str = Field(description="An explanation of why the test code is valid or invalid against the context")
-    suggestions: List[str] = Field(description="A list of suggestions to improve the test code")
+
+    is_valid: bool = Field(
+        description="Whether the test code is valid against the context"
+    )
+    explanation: str = Field(
+        description="An explanation of why the test code is valid or invalid against the context"
+    )
+    suggestions: List[str] = Field(
+        description="A list of suggestions to improve the test code"
+    )
 
 
 class TestFailureAnalysis(BaseModel):
     """Model for test failure analysis.
-    
+
     Example:
         ```python
         analysis = TestFailureAnalysis(
@@ -134,6 +177,7 @@ class TestFailureAnalysis(BaseModel):
         )
         ```
     """
+
     failure_reason: str = Field(description="The reason why the test failed")
     explanation: str = Field(description="An explanation of the failure reason")
-    suggestions: List[str] = Field(description="A list of suggestions to fix the test") 
+    suggestions: List[str] = Field(description="A list of suggestions to fix the test")
