@@ -4,7 +4,7 @@ from typing import Literal, List
 from pydantic import BaseModel, Field
 from pydantic_settings import BaseSettings
 
-from schemas.mcp import SseClientSchema, StdioClientSchema
+from app.schemas.mcp import SseClientSchema, StdioClientSchema
 
 
 class CommonSettings(BaseSettings):

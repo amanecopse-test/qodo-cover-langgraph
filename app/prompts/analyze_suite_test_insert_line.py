@@ -2,8 +2,8 @@ from typing import List, Optional, Type
 
 from langchain_core.messages import BaseMessage
 from pydantic import BaseModel
-from .base import PromptABC
-from ..schemas.structured_output import TestsAnalysis
+from app.prompts.base import PromptABC
+from app.schemas.structured_output import TestsAnalysis
 
 
 class AnalyzeSuiteTestInsertLine(PromptABC):

@@ -3,8 +3,8 @@ from typing import List, Optional, Type
 from langchain_core.messages import BaseMessage
 from pydantic import BaseModel
 
-from ..schemas.structured_output import NewTests
-from .base import PromptABC
+from app.prompts.base import PromptABC
+from app.schemas.structured_output import NewTests
 
 
 class TestGenerationPrompt(PromptABC):

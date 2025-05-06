@@ -15,13 +15,16 @@ from typing import (
 from langchain_core.language_models import BaseChatModel
 from langchain_core.messages import BaseMessage, AIMessage, ToolMessage
 from langchain_core.tools import BaseTool
-from langgraph.graph import StateGraph, AgentStateWithStructuredResponsePydantic
+from langgraph.graph import StateGraph
+from langgraph.prebuilt.chat_agent_executor import (
+    AgentStateWithStructuredResponsePydantic,
+)
 from langgraph.graph.graph import CompiledGraph
 from langgraph.prebuilt import ToolNode
 from langgraph.types import RetryPolicy
 from pydantic import BaseModel
 
-from exceptions.node_exception import (
+from app.exceptions.node_exception import (
     InvalidReasoningException,
     EmptyOutputException,
 )

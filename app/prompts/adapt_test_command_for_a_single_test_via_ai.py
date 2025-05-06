@@ -3,12 +3,12 @@ from typing import List, Type
 from langchain_core.messages import BaseMessage
 from pydantic import BaseModel
 
-from ..schemas.structured_output import TestAnalysis
-from .base import PromptABC
+from app.schemas.structured_output import AdaptedTestCommand
+from app.prompts.base import PromptABC
 
 
-class AnalyzeTestRunFailure(PromptABC):
-    """Prompt builder for analyzing test run failure."""
+class AdaptTestCommandForASingleTestViaAI(PromptABC):
+    """Prompt builder for adapting test command for a single test."""
 
     def __init__(
         self,
@@ -16,24 +16,24 @@ class AnalyzeTestRunFailure(PromptABC):
         test_file_name: str,
         test_file: str,
         test_name: str,
-        test_code: str,
+        test_command: str,
         test_output: str,
     ):
-        """Initialize the analyze test run failure prompt.
+        """Initialize the adapt test command prompt.
 
         Args:
             language (str): Programming language of the source code
             test_file_name (str): Name of the test file
             test_file (str): Content of the test file
-            test_name (str): Name of the test that failed
-            test_code (str): Code of the test that failed
-            test_output (str): Output of the test that failed
+            test_name (str): Name of the test to adapt
+            test_command (str): Command that was used to run the test
+            test_output (str): Output of the test command
         """
         self.language = language
         self.test_file_name = test_file_name
         self.test_file = test_file
         self.test_name = test_name
-        self.test_code = test_code
+        self.test_command = test_command
         self.test_output = test_output
 
     def get_output_model(self) -> Type[BaseModel]:
@@ -42,40 +42,46 @@ class AnalyzeTestRunFailure(PromptABC):
         Returns:
             Type[BaseModel]: The Pydantic model class that represents the output structure.
         """
-        return TestAnalysis
+        return AdaptedTestCommand
 
     def build(self) -> List[BaseMessage]:
-        """Build the analyze test run failure prompt.
+        """Build the adapt test command prompt.
 
         Returns:
             List[BaseMessage]: List of system and user messages
         """
         messages: List[BaseMessage] = []
 
+        # Build system message
+        system_content = "You are a code assistant that helps developers to adapt a command line to run only a single test file."
+        system_message = self._create_system_message(system_content)
+        if system_message:
+            messages.append(system_message)
+
         # Build user message
         user_content = self._dedent(
             f"""
             ## Overview
-            You are a code assistant that accepts a {self.language} test file, a test name, a test code, and a test output.
-            Your goal is to analyze why the test failed.
+            You are a code assistant that accepts a {self.language} test file, a test name, a test command, and a test output.
+            Your goal is to adapt the test command to run a single test.
 
             ## Test File
-            Here is the test file that you will be analyzing, called `{self.test_file_name}`:
+            Here is the test file that you will be adapting the command for, called `{self.test_file_name}`:
             =========
             {self.test_file.strip()}
             =========
 
             ## Test Name
-            The test name that failed is: `{self.test_name}`
+            The test name to adapt the command for is: `{self.test_name}`
 
-            ## Test Code
-            The test code that failed is:
+            ## Test Command
+            The command that was used to run the test is:
             ```
-            {self.test_code.strip()}
+            {self.test_command.strip()}
             ```
 
             ## Test Output
-            The output of the test that failed is:
+            The output of the test command is:
             ```
             {self.test_output.strip()}
             ```

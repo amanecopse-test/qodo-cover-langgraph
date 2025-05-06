@@ -2,8 +2,8 @@ from typing import List, Type
 
 from langchain_core.messages import BaseMessage
 from pydantic import BaseModel
-from .base import PromptABC
-from ..schemas.structured_output import TestHeadersIndentation
+from app.prompts.base import PromptABC
+from app.schemas.structured_output import TestHeadersIndentation
 
 
 class AnalyzeSuiteTestHeadersIndentation(PromptABC):
@@ -28,7 +28,7 @@ class AnalyzeSuiteTestHeadersIndentation(PromptABC):
 
     def get_output_model(self) -> Type[BaseModel]:
         """Get the output model type for this prompt.
-        
+
         Returns:
             Type[BaseModel]: The Pydantic model class that represents the output structure.
         """
@@ -43,7 +43,8 @@ class AnalyzeSuiteTestHeadersIndentation(PromptABC):
         messages: List[BaseMessage] = []
 
         # Build user message
-        user_content = self._dedent(f"""
+        user_content = self._dedent(
+            f"""
             ## Overview
             You are a code assistant that accepts a {self.language} test file.
             Your goal is to analyze the indentation of test headers in the test file.
@@ -53,10 +54,11 @@ class AnalyzeSuiteTestHeadersIndentation(PromptABC):
             =========
             {self.test_file.strip()}
             =========
-        """)
+        """
+        )
 
         user_message = self._create_user_message(user_content)
         if user_message:
             messages.append(user_message)
 
-        return messages 
+        return messages

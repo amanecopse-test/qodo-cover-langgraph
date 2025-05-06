@@ -7,8 +7,8 @@ from mcp.client.sse import sse_client
 from mcp.client.stdio import stdio_client
 from pydantic import BaseModel
 
-from core.setting import mcp_settings
-from schemas.mcp import SseClientSchema, StdioClientSchema
+from app.core.setting import mcp_settings
+from app.schemas.mcp import SseClientSchema, StdioClientSchema
 
 
 class McpClient:

@@ -4,7 +4,7 @@ from abc import ABC, abstractmethod
 from langchain_core.language_models import BaseChatModel
 from langchain_google_genai import ChatGoogleGenerativeAI
 
-from schemas.model_factory import ModelParams, GeminiParams
+from app.schemas.model_factory import ModelParams, GeminiParams
 
 
 class BaseModelLoader(ABC):
