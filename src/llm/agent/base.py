@@ -1,6 +1,16 @@
 import logging
 from abc import ABC, abstractmethod
-from typing import Literal, Sequence, Callable, List, Type, TypeVar, Coroutine, Any
+from typing import (
+    Literal,
+    Optional,
+    Sequence,
+    Callable,
+    List,
+    Type,
+    TypeVar,
+    Coroutine,
+    Any,
+)
 
 from langchain_core.language_models import BaseChatModel
 from langchain_core.messages import BaseMessage, AIMessage, ToolMessage
@@ -95,15 +105,19 @@ class BaseAgentBuilder(ABC):
 
         return workflow
 
-    @classmethod
     def create_llm_node(
-        cls,
-        model: BaseChatModel,
-        tools: List[BaseTool],
+        self,
+        model: Optional[BaseChatModel] = None,
+        tools: Optional[List[BaseTool]] = None,
         message_builder: Callable[
             [AgentStateLike], Sequence[BaseMessage]
         ] = lambda state: state.messages,
     ) -> Callable[[AgentStateLike], Coroutine[Any, Any, AgentStateLike]]:
+        if model is None:
+            model = self.model
+        if tools is None:
+            tools = self.tools
+
         async def llm_node(state: AgentStateLike) -> AgentStateLike:
             logging.info("에이전트 추론 중...")
             model_with_tools = model.bind_tools(tools)
@@ -119,15 +133,17 @@ class BaseAgentBuilder(ABC):
 
         return llm_node
 
-    @classmethod
     def create_output_node(
-        cls,
-        model: BaseChatModel,
+        self,
         output_schema: Type[BaseModel],
+        model: Optional[BaseChatModel] = None,
         output_processor: Callable[
             [AgentStateLike, OutputLike], None
         ] = lambda state, output: ...,
     ) -> Callable[[AgentStateLike], Coroutine[Any, Any, AgentStateLike]]:
+        if model is None:
+            model = self.model
+
         async def output_node(state: AgentStateLike) -> AgentStateLike:
             model_with_output = model.with_structured_output(output_schema)
             inputs = [
