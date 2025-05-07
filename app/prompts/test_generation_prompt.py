@@ -1,4 +1,4 @@
-from typing import List, Optional, Type
+from typing import List, Optional, Type, override
 
 from langchain_core.messages import BaseMessage
 from pydantic import BaseModel
@@ -51,6 +51,7 @@ class TestGenerationPrompt(PromptABC):
         self.failed_tests_section = failed_tests_section
         self.additional_instructions_text = additional_instructions_text
 
+    @override
     def get_output_model(self) -> Type[BaseModel]:
         """Get the output model type for this prompt.
 
@@ -59,6 +60,7 @@ class TestGenerationPrompt(PromptABC):
         """
         return NewTests
 
+    @override
     def build(self) -> List[BaseMessage]:
         """Build the test generation prompt.
 

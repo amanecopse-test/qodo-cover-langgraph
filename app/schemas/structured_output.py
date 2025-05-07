@@ -71,6 +71,27 @@ class NewTests(BaseModel):
     )
 
 
+class TestFile(BaseModel):
+    """Model for a test file.
+
+    Example:
+        ```python
+        test_file = TestFile(
+            language="python",
+            name="test_file.py",
+            content="\\n".join([
+                "def test_example(self):",
+                "    assert True",
+            ]),
+        )
+        ```
+    """
+
+    language: str = Field(description="The programming language of the test file")
+    name: str = Field(description="The name of the test file")
+    content: str = Field(description="The content of the test file")
+
+
 class AdaptedTestCommand(BaseModel):
     """Model for adapted test command.
 
