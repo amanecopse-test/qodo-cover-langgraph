@@ -67,8 +67,11 @@ class BaseAgentBuilder(ABC):
         state_schema: Type[AgentStateLike],
         llm_node: Callable[[AgentStateLike], Coroutine[Any, Any, AgentStateLike]],
         output_node: Callable[[AgentStateLike], Coroutine[Any, Any, AgentStateLike]],
-        tools: List[BaseTool],
+        tools: Optional[List[BaseTool]] = None,
     ) -> StateGraph:
+        if tools is None:
+            tools = self.tools
+
         workflow = StateGraph(state_schema)
 
         workflow.add_node(LLM_NODE, llm_node, retry=retry_policy)
@@ -78,17 +81,17 @@ class BaseAgentBuilder(ABC):
         def route_from_tool_node(
             state: AgentStateLike,
         ) -> Literal["llm_node", "output_node"]:
-            if len(state.messages) is 0:
+            if len(state.messages) == 0:
                 raise Exception("No messages in state")
 
             if "ToolException" in state.messages[-1].content:
                 return LLM_NODE
 
-            if self.tool_call_mode is "none":
+            if self.tool_call_mode == "none":
                 return OUTPUT_NODE
-            elif self.tool_call_mode is "single_turn":
+            elif self.tool_call_mode == "single_turn":
                 return OUTPUT_NODE
-            elif self.tool_call_mode is "multi_turn":
+            elif self.tool_call_mode == "multi_turn":
                 if isinstance(state.messages[-1], ToolMessage):
                     return LLM_NODE
                 else:
@@ -126,7 +129,7 @@ class BaseAgentBuilder(ABC):
             model_with_tools = model.bind_tools(tools)
             inputs = message_builder(state)
             new_message: BaseMessage = await model_with_tools.ainvoke(inputs)
-            if _is_invalid_reasoning(new_message, state):
+            if self._is_invalid_reasoning(new_message, state):
                 logging.error("Invalid reasoning exception")
                 raise InvalidReasoningException()
             logging.info("도구 선택: %s", new_message.tool_calls)
@@ -165,23 +168,22 @@ class BaseAgentBuilder(ABC):
 
         return output_node
 
+    def _is_invalid_reasoning(
+        self,
+        current_message: BaseMessage,
+        state: AgentStateLike,
+    ) -> bool:
+        if not isinstance(current_message, AIMessage):
+            return False
 
-def _is_invalid_reasoning(
-    current_message: BaseMessage,
-    state: AgentStateLike,
-) -> bool:
-    if not isinstance(current_message, AIMessage):
-        return False
-
-    tool_call_mode = state.tool_call_mode
-    if tool_call_mode == "none":
-        return True
-    elif tool_call_mode == "single_turn":
-        return _is_empty_tool_calls(current_message)
-    elif tool_call_mode == "multi_turn":
-        return _is_empty_tool_calls(current_message) and _no_tool_calls_in_messages(
-            state
-        )
+        if self.tool_call_mode == "none":
+            return True
+        elif self.tool_call_mode == "single_turn":
+            return _is_empty_tool_calls(current_message)
+        elif self.tool_call_mode == "multi_turn":
+            return _is_empty_tool_calls(current_message) and _no_tool_calls_in_messages(
+                state
+            )
 
 
 def _is_empty_tool_calls(message: AIMessage) -> bool:
