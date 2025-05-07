@@ -10,6 +10,10 @@ from app.schemas.structured_output import NewTests
 
 
 class TestGenAgent(BaseAgentBuilder):
+    """
+    커버리지 향상을 위해 추가 테스트를 생성하는 에이전트
+    """
+
     def __init__(self, model: BaseChatModel):
         super().__init__(
             model=model,
@@ -27,9 +31,9 @@ class TestGenAgent(BaseAgentBuilder):
     async def generate_vitest_test(
         self,
         source_file_name: str,
-        source_file: str,
+        source_file_content: str,
         test_file_name: str,
-        test_file: str,
+        test_file_content: str,
         code_coverage_report: Optional[str] = None,
     ) -> NewTests:
         agent = self.build()
@@ -41,11 +45,11 @@ class TestGenAgent(BaseAgentBuilder):
                     source_file_numbered="\n".join(
                         [
                             f"{i+1}: {line}"
-                            for i, line in enumerate(source_file.splitlines())
+                            for i, line in enumerate(source_file_content.splitlines())
                         ]
                     ),
                     test_file_name=test_file_name,
-                    test_file=test_file,
+                    test_file=test_file_content,
                     testing_framework="vitest",
                     code_coverage_report=str(code_coverage_report),
                     max_tests=10,

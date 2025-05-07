@@ -16,9 +16,9 @@ async def test_test_gen_agent():
     )
     response = await agent.generate_vitest_test(
         source_file_name="button.tsx",
-        source_file=get_source_file(),
+        source_file_content=get_source_file(),
         test_file_name="button.test.tsx",
-        test_file=get_test_file(),
+        test_file_content=get_test_file(),
     )
     print(response)
 
