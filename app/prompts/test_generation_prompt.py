@@ -74,9 +74,9 @@ class TestGenerationPrompt(PromptABC):
 
         # Build user message
         user_content = self._dedent(
-            f"""
+            """
             ## Overview
-            You are a code assistant that accepts a {self.language} source file, and a {self.language} test file.
+            You are a code assistant that accepts a {language} source file, and a {language} test file.
             Your goal is to generate additional comprehensive unit tests to complement the existing test suite, in order to increase the code coverage against the source file.
 
             Additional guidelines:
@@ -86,73 +86,106 @@ class TestGenerationPrompt(PromptABC):
             - If the original test file contains a test suite, assume that each generated test will be a part of the same suite. Ensure that the new tests are consistent with the existing test suite in terms of style, naming conventions, and structure.
 
             ## Source File
-            Here is the source file that you will be writing tests against, called `{self.source_file_name}`.
+            Here is the source file that you will be writing tests against, called `{source_file_name}`.
             Note that we have manually added line numbers for each line of code, to help you understand the code coverage report.
             Those numbers are not a part of the original code.
             =========
-            {self.source_file_numbered.strip()}
+            {source_file_numbered}
             =========
 
             ## Test File
-            Here is the file that contains the existing tests, called `{self.test_file_name}`:
+            Here is the file that contains the existing tests, called `{test_file_name}`:
             =========
-            {self.test_file.strip()}
+            {test_file}
             =========
 
             ### Test Framework
-            The test framework used for running tests is `{self.testing_framework}`.
-        """
+            The test framework used for running tests is `{testing_framework}`.
+            """
+        ).format(
+            language=self.language,
+            source_file_name=self.source_file_name,
+            source_file_numbered=self.source_file_numbered,
+            test_file_name=self.test_file_name,
+            test_file=self.test_file,
+            testing_framework=self.testing_framework,
         )
 
         if self.language == "python" and self.testing_framework == "pytest":
             user_content += self._dedent(
                 """
                 If the current tests are part of a class and contain a 'self' input, then the generated tests should also include the `self` parameter in the test function signature.
-            """
+                """
             )
 
         if self.additional_includes_section:
             user_content += self._dedent(
-                f"""
+                """
                 ## Additional Includes
                 Here are the additional files needed to provide context for the source code:
                 ======
-                {self.additional_includes_section.strip()}
+                {additional_includes_section}
                 ======
-            """
-            )
+                """
+            ).format(additional_includes_section=self.additional_includes_section)
 
         if self.failed_tests_section:
             user_content += self._dedent(
-                f"""
+                """
                 ## Previous Iterations Failed Tests
                 Below is a list of failed tests that were generated in previous iterations. Do not generate the same tests again, and take these failed tests into account when generating new tests.
                 ======
-                {self.failed_tests_section.strip()}
+                {failed_tests_section}
                 ======
-            """
-            )
+                """
+            ).format(failed_tests_section=self.failed_tests_section)
 
         if self.additional_instructions_text:
             user_content += self._dedent(
-                f"""
+                """
                 ## Additional Instructions
                 ======
-                {self.additional_instructions_text.strip()}
+                {additional_instructions_text}
                 ======
-            """
-            )
+                """
+            ).format(additional_instructions_text=self.additional_instructions_text)
 
         user_content += self._dedent(
-            f"""
+            """
             ## Code Coverage
-            Based on the code coverage report below, your goal is to suggest new test cases for the test file `{self.test_file_name}` against the source file `{self.source_file_name}` that would increase the coverage, meaning cover missing lines of code.
+            Based on the code coverage report below, your goal is to suggest new test cases for the test file `{test_file_name}` against the source file `{source_file_name}` that would increase the coverage, meaning cover missing lines of code.
             =========
-            {self.code_coverage_report.strip()}
+            {code_coverage_report}
             =========
-        """
+            """
+        ).format(
+            test_file_name=self.test_file_name,
+            source_file_name=self.source_file_name,
+            code_coverage_report=self.code_coverage_report,
         )
 
+        user_content += self._dedent(
+            """
+            ## Output Example
+            Here is an example of the output you should generate:
+            =========
+            NewTests(
+                language="python",
+                existing_test_function_signature="def test_example(self):",
+                new_tests=[
+                    SingleTest(
+                        test_behavior="Test single element list",
+                        lines_to_cover="[1,2,5]",
+                        test_name="test_single_element_list",
+                        test_code="def test_single_element_list(self):\\n    result = function([1])\\n    assert result == expected",
+                        new_imports_code="",
+                        test_tags="happy path"
+                    )
+                ]
+            )
+            =========
+            """
+        )
         user_message = self._create_user_message(user_content)
         if user_message:
             messages.append(user_message)

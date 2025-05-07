@@ -129,7 +129,7 @@ class BaseAgentBuilder(ABC):
             model_with_tools = model.bind_tools(tools)
             inputs = message_builder(state)
             new_message: BaseMessage = await model_with_tools.ainvoke(inputs)
-            if self._is_invalid_reasoning(new_message, state):
+            if not self._is_valid_reasoning(new_message, state):
                 logging.error("Invalid reasoning exception")
                 raise InvalidReasoningException()
             logging.info("도구 선택: %s", new_message.tool_calls)
@@ -168,7 +168,7 @@ class BaseAgentBuilder(ABC):
 
         return output_node
 
-    def _is_invalid_reasoning(
+    def _is_valid_reasoning(
         self,
         current_message: BaseMessage,
         state: AgentStateLike,
@@ -177,12 +177,13 @@ class BaseAgentBuilder(ABC):
             return False
 
         if self.tool_call_mode == "none":
-            return True
+            return _is_empty_tool_calls(current_message)
         elif self.tool_call_mode == "single_turn":
             return _is_empty_tool_calls(current_message)
         elif self.tool_call_mode == "multi_turn":
-            return _is_empty_tool_calls(current_message) and _no_tool_calls_in_messages(
-                state
+            return not (
+                _is_empty_tool_calls(current_message)
+                and _no_tool_calls_in_messages(state)
             )
 
 

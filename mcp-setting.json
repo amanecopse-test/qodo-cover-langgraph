@@ -1,15 +1,4 @@
 {
-    "sse_clients": [
-        {
-        "mcp_sse_url": "url"
-        }
-    ],
-    "stdio_clients": [
-        {
-        "mcp_stdio_command": "cmd",
-        "mcp_stdio_args": [
-            "arg1"
-        ]
-        }
-    ]
+    "sse_clients": [],
+    "stdio_clients": []
 }

@@ -7,6 +7,7 @@ import pytest
 
 from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain_core.tools import Tool
+from langchain_core.messages import HumanMessage
 from langgraph.prebuilt.chat_agent_executor import (
     AgentStateWithStructuredResponsePydantic,
 )
@@ -21,8 +22,6 @@ class WeatherResponse(BaseModel):
 
 
 class WeatherState(AgentStateWithStructuredResponsePydantic):
-    weather: Optional[str] = None
-    location: Optional[str] = None
     structured_response: Optional[WeatherResponse] = None
 
 
@@ -30,23 +29,24 @@ class WeatherState(AgentStateWithStructuredResponsePydantic):
 async def test_agent():
     load_dotenv()
     agent = WeatherAgent().build()
-    # Initialize with messages and proper structured_response object
     response = await agent.ainvoke(
-        {
-            "messages": [
-                textwrap.dedent(
-                    """
-                    You are a weather agent. Follow the instructions below to get the weather in a specific location.
-                    The postal code is 102-711.
-                    
-                    Instructions:
-                    1. Get the current location at the postal code using the location_tool
-                    2. Get the weather in the current location using the weather_tool
-                    3. Return the weather in the current location
-                    """
+        WeatherState(
+            messages=[
+                HumanMessage(
+                    textwrap.dedent(
+                        """
+                        You are a weather agent. Follow the instructions below to get the weather in a specific location.
+                        The postal code is 102-711.
+                        
+                        Instructions:
+                        1. Get the current location at the postal code using the location_tool
+                        2. Get the weather in the current location using the weather_tool
+                        3. Return the weather in the current location
+                        """
+                    )
                 )
             ]
-        }
+        ).model_dump()
     )
     print(response)
 

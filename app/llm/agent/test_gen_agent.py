@@ -1,0 +1,153 @@
+import textwrap
+from typing import Optional
+from langchain_core.language_models import BaseChatModel
+from langgraph.graph.graph import CompiledGraph
+
+from app.llm.agent.base import BaseAgentBuilder
+from app.prompts.test_generation_prompt import TestGenerationPrompt
+from app.schemas.state import TestGenState
+from app.schemas.structured_output import NewTests
+
+
+class TestGenAgent(BaseAgentBuilder):
+    def __init__(self, model: BaseChatModel):
+        super().__init__(
+            model=model,
+            tools=[],
+            tool_call_mode="none",
+        )
+
+    def build(self) -> CompiledGraph:
+        return self.create_agentic_graph(
+            state_schema=TestGenState,
+            llm_node=self.create_llm_node(),
+            output_node=self.create_output_node(NewTests),
+        ).compile()
+
+    async def generate_vitest_test(
+        self,
+        source_file_name: str,
+        source_file: str,
+        test_file_name: str,
+        test_file: str,
+        code_coverage_report: Optional[str] = None,
+    ) -> NewTests:
+        agent = self.build()
+        response = await agent.ainvoke(
+            TestGenState(
+                messages=TestGenerationPrompt(
+                    language="typescript",
+                    source_file_name=source_file_name,
+                    source_file_numbered="\n".join(
+                        [
+                            f"{i+1}: {line}"
+                            for i, line in enumerate(source_file.splitlines())
+                        ]
+                    ),
+                    test_file_name=test_file_name,
+                    test_file=test_file,
+                    testing_framework="vitest",
+                    code_coverage_report=str(code_coverage_report),
+                    max_tests=10,
+                    additional_instructions_text=_get_additional_instructions(),
+                ).build()
+            )
+        )
+        return response["structured_response"].new_tests
+
+
+def _get_additional_instructions():
+    return textwrap.dedent(
+        """
+// It's our testing library
+/**
+ * This file is used to configure the testing library for the project.
+ */
+import '@testing-library/jest-dom';
+import '@testing-library/jest-dom/vitest';
+import userEvent from '@testing-library/user-event';
+import { vi } from 'vitest';
+
+import { configure, render, RenderOptions } from '@testing-library/react';
+import { ReactNode } from 'react';
+
+configure({ testIdAttribute: 'data-sp-id' });
+
+/**
+ * Creates a mock of the event bus store.
+ * @returns A mock of the event bus store.
+ */
+const createEventBusStore = () => ({
+  getState: () => ({
+    subscribe: vi.fn(),
+    subscribeOne: vi.fn(),
+    unsubscribe: vi.fn(),
+    unsubscribeAll: vi.fn(),
+    publish: vi.fn(),
+    getLastEvent: vi.fn(),
+  }),
+});
+
+/**
+ * Renders a React component and sets up user events for testing.
+ * Combines React Testing Library's render with user event setup for convenience.
+ *
+ * @param jsx - The React component or JSX element to render
+ * @returns An object containing both user event setup and render results
+ * @example
+ * ```tsx
+ * const { user, container } = renderWithSetup(<MyComponent />);
+ * await user.click(container.querySelector('button'));
+ * ```
+ */
+const renderWithSetup = (jsx: ReactNode, options?: RenderOptions) => {
+  return {
+    user: userEvent.setup(),
+    ...render(jsx, options),
+  };
+};
+
+export * from '@testing-library/react';
+export { createEventBusStore, renderWithSetup };
+
+
+// It's Vitest, not Jest
+
+import { render, renderWithSetup, screen } from 'shared-utils-test';
+
+import Button from '../Button';
+
+describe('<Button/> Test', () => {
+  test('Should render in DOM', () => {
+    render(<Button>button</Button>);
+    const button = screen.getByRole('button', {
+      name: 'button',
+    });
+    expect(button).toBeInTheDocument();
+    expect(button.textContent).toBe('button');
+  });
+
+  test('Should be disabled', () => {
+    render(<Button disabled>button</Button>);
+    const button = screen.getByRole('button', {
+      name: 'button',
+    });
+    expect(button).toBeDisabled();
+  });
+
+  test('Should call the callback function on click', async () => {
+    const handleClick = vitest.fn((event) => event);
+    const { user } = renderWithSetup(
+      <Button onClick={handleClick}>button</Button>,
+    );
+
+    const button = screen.getByRole('button', {
+      name: 'button',
+    });
+    await user.click(button);
+
+    expect(handleClick).toHaveBeenCalledOnce();
+  });
+});
+        """
+    ).strip()
