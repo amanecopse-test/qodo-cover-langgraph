@@ -1,6 +1,5 @@
-from mailbox import BabylMessage
 from typing import List, Optional, Type, override
-from langchain_core.messages import HumanMessage
+from langchain_core.messages import HumanMessage, BaseMessage
 from pydantic import BaseModel
 
 from app.prompts.base import PromptABC
@@ -32,7 +31,7 @@ class TestValidationPrompt(PromptABC):
 
     @override
     def build(self) -> list[HumanMessage]:
-        messages: List[BabylMessage] = []
+        messages: List[BaseMessage] = []
 
         # Build user message
         user_content = self._dedent(
