@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Optional
 
 from pydantic import BaseModel, Field
 
@@ -92,97 +92,51 @@ class TestFile(BaseModel):
     content: str = Field(description="The content of the test file")
 
 
-class AdaptedTestCommand(BaseModel):
-    """Model for adapted test command.
+class TestCoverage(BaseModel):
+    """Model for a test file.
 
     Example:
         ```python
-        command = AdaptedTestCommand(
-            adapted_command="pytest test_file.py::test_name",
-            explanation="Modified the command to run only the specific test using pytest's test selection syntax"
+        test_coverage = TestCoverage(
+            stdout="",
+            stderr="",
+            coverage_percent=60,
+            uncovered_lines=[11, 14, 15],
         )
         ```
     """
 
-    adapted_command: str = Field(description="The adapted command to run a single test")
-    explanation: str = Field(
-        description="An explanation of how the command was adapted"
+    stdout: Optional[str] = Field(description="The stdout of the test file")
+    stderr: Optional[str] = Field(description="The stderr of the test file")
+    coverage_percent: Optional[int] = Field(
+        description="The coverage percent of the test file"
+    )
+    uncovered_lines: Optional[List[int]] = Field(
+        description="The uncovered lines of the test file"
     )
 
 
-class TestHeadersIndentation(BaseModel):
-    """Model for test headers indentation analysis.
+class TestFileAnalysis(BaseModel):
+    """Model for test file analysis.
 
     Example:
         ```python
-        analysis = TestHeadersIndentation(
-            test_headers=["test_header_1", "test_header_2"],
-            indentation_levels=[0, 1],
-            explanation="The test headers follow a consistent indentation pattern where main headers are at level 0 and sub-headers are at level 1"
-        )
-        ```
-    """
-
-    test_headers: List[str] = Field(
-        description="A list of test headers found in the test file"
-    )
-    indentation_levels: List[int] = Field(
-        description="A list of indentation levels for each test header"
-    )
-    explanation: str = Field(
-        description="An explanation of the indentation pattern found in the test file"
-    )
-
-
-class TestsAnalysis(BaseModel):
-    """Model for test suite analysis.
-
-    Example:
-        ```python
-        analysis = TestsAnalysis(
-            language="python",
-            testing_framework="pytest",
-            number_of_tests=5,
+        analysis = TestFileAnalysis(
+            test_headers_indentation=0,
             relevant_line_number_to_insert_tests_after=42,
             relevant_line_number_to_insert_imports_after=10
         )
         ```
     """
 
-    language: str = Field(description="The programming language used by the test file")
-    testing_framework: str = Field(
-        description="The testing framework needed to run the tests in the test file"
+    test_headers_indentation: int = Field(
+        description="The indentation of the test headers in the test file. For example, 'def test_...' has an indentation of 0, '  def test_...' has an indentation of 2, '    def test_...' has an indentation of 4, and so on."
     )
-    number_of_tests: int = Field(description="The number of tests in the test file")
-    relevant_line_number_to_insert_tests_after: int = Field(
+    line_number_to_insert_tests_after: int = Field(
         description="The line number in the test file, after which the new tests should be inserted"
     )
-    relevant_line_number_to_insert_imports_after: int = Field(
+    line_number_to_insert_imports_after: int = Field(
         description="The line number in the test file, after which new imports should be inserted"
-    )
-
-
-class TestAnalysis(BaseModel):
-    """Model for test analysis against context.
-
-    Example:
-        ```python
-        analysis = TestAnalysis(
-            is_valid=True,
-            explanation="The test code is valid against the context as it properly uses all required imports and follows the expected patterns",
-            suggestions=["Consider adding more edge cases", "Add error handling for invalid inputs"]
-        )
-        ```
-    """
-
-    is_valid: bool = Field(
-        description="Whether the test code is valid against the context"
-    )
-    explanation: str = Field(
-        description="An explanation of why the test code is valid or invalid against the context"
-    )
-    suggestions: List[str] = Field(
-        description="A list of suggestions to improve the test code"
     )
 
 

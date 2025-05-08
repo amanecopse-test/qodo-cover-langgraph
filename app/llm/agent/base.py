@@ -84,7 +84,10 @@ class BaseAgentBuilder(ABC):
             if len(state.messages) == 0:
                 raise Exception("No messages in state")
 
-            if "ToolException" in state.messages[-1].content:
+            if (
+                "ToolException" in state.messages[-1].content
+                or state.messages[-1].status == "error"
+            ):
                 return LLM_NODE
 
             if self.tool_call_mode == "none":
@@ -179,7 +182,7 @@ class BaseAgentBuilder(ABC):
         if self.tool_call_mode == "none":
             return _is_empty_tool_calls(current_message)
         elif self.tool_call_mode == "single_turn":
-            return _is_empty_tool_calls(current_message)
+            return not _is_empty_tool_calls(current_message)
         elif self.tool_call_mode == "multi_turn":
             return not (
                 _is_empty_tool_calls(current_message)
@@ -194,6 +197,11 @@ def _is_empty_tool_calls(message: AIMessage) -> bool:
 
 def _no_tool_calls_in_messages(state: AgentStateLike) -> bool:
     prev_tool_message_count = len(
-        list(filter(lambda msg: isinstance(msg, ToolMessage), state.messages))
+        list(
+            filter(
+                lambda msg: isinstance(msg, ToolMessage) and msg.status != "error",
+                state.messages,
+            )
+        )
     )
     return prev_tool_message_count == 0
