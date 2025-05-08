@@ -5,6 +5,7 @@ from langgraph.prebuilt.chat_agent_executor import (
 
 from app.schemas.structured_output import (
     NewTests,
+    TestFailureAnalysis,
     TestFile,
     TestCoverage,
     TestFileAnalysis,
@@ -25,3 +26,7 @@ class TestValidationState(AgentStateWithStructuredResponsePydantic):
 
 class TestAnalysisState(AgentStateWithStructuredResponsePydantic):
     structured_response: Optional[TestFileAnalysis] = None
+
+
+class TestFailureAnalysisState(AgentStateWithStructuredResponsePydantic):
+    structured_response: Optional[TestFailureAnalysis] = None
