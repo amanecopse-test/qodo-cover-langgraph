@@ -29,7 +29,7 @@ class TestAnalysisAgent(BaseAgentBuilder):
             output_node=self.create_output_node(TestFileAnalysis),
         ).compile()
 
-    async def validate_vitest(
+    async def analyze_vitest(
         self,
         test_file_content: str,
     ) -> TestFileAnalysis:

@@ -9,7 +9,7 @@ from app.schemas.structured_output import TestFileAnalysis
 
 
 @pytest.mark.asyncio
-async def test_validate_vitest():
+async def test_analyze_vitest():
     agent = TestAnalysisAgent(
         model=await ModelFactory().load_llm(
             GeminiParams(api_key=gemini_settings.GEMINI_API_KEY)
@@ -22,7 +22,7 @@ async def test_validate_vitest():
         last_import_line_number=1,
     )
 
-    result = await agent.validate_vitest(get_test_file_content())
+    result = await agent.analyze_vitest(get_test_file_content())
 
     assert result == expected_response
 
