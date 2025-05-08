@@ -52,7 +52,9 @@ class BaseAgentBuilder(ABC):
         self,
         model: BaseChatModel,
         tools: List[BaseTool] = [],
-        tool_call_mode: Literal["multi_turn", "single_turn", "none"] = "single_turn",
+        tool_call_mode: Literal[
+            "multi_turn", "multi_turn_with_force_tool_call", "single_turn", "none"
+        ] = "single_turn",
     ):
         self.model = model
         self.tools = tools
@@ -181,6 +183,8 @@ class BaseAgentBuilder(ABC):
         elif self.tool_call_mode == "single_turn":
             return not _is_empty_tool_calls(current_message)
         elif self.tool_call_mode == "multi_turn":
+            return True
+        elif self.tool_call_mode == "multi_turn_with_force_tool_call":
             return not (
                 _is_empty_tool_calls(current_message)
                 and _no_tool_calls_in_messages(state)
