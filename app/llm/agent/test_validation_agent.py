@@ -1,8 +1,7 @@
 from typing import List
 from langchain_core.language_models import BaseChatModel
 from langgraph.graph.graph import CompiledGraph
-from mcp import Tool
-
+from langchain_core.tools import BaseTool
 from app.llm.agent.base import BaseAgentBuilder
 from app.prompts.test_validation_prompt import TestValidationPrompt
 from app.schemas.state import TestValidationState
@@ -17,7 +16,7 @@ class TestValidationAgent(BaseAgentBuilder):
     def __init__(
         self,
         model: BaseChatModel,
-        tools: List[Tool],
+        tools: List[BaseTool],
     ):
         super().__init__(
             model=model,
