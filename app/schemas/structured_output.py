@@ -123,8 +123,8 @@ class TestFileAnalysis(BaseModel):
         ```python
         analysis = TestFileAnalysis(
             test_headers_indentation=0,
-            relevant_line_number_to_insert_tests_after=42,
-            relevant_line_number_to_insert_imports_after=10
+            last_single_test_line_number=42,
+            last_import_line_number=10
         )
         ```
     """
@@ -132,11 +132,11 @@ class TestFileAnalysis(BaseModel):
     test_headers_indentation: int = Field(
         description="The indentation of the test headers in the test file. For example, 'def test_...' has an indentation of 0, '  def test_...' has an indentation of 2, '    def test_...' has an indentation of 4, and so on."
     )
-    line_number_to_insert_tests_after: int = Field(
-        description="The line number in the test file, after which the new tests should be inserted"
+    last_single_test_line_number: int = Field(
+        description="The last line number of the single test"
     )
-    line_number_to_insert_imports_after: int = Field(
-        description="The line number in the test file, after which new imports should be inserted"
+    last_import_line_number: int = Field(
+        description="The last line number of the imports"
     )
 
 

@@ -3,7 +3,12 @@ from langgraph.prebuilt.chat_agent_executor import (
     AgentStateWithStructuredResponsePydantic,
 )
 
-from app.schemas.structured_output import NewTests, TestFile, TestCoverage
+from app.schemas.structured_output import (
+    NewTests,
+    TestFile,
+    TestCoverage,
+    TestFileAnalysis,
+)
 
 
 class TestGenState(AgentStateWithStructuredResponsePydantic):
@@ -16,3 +21,7 @@ class TestFinderState(AgentStateWithStructuredResponsePydantic):
 
 class TestValidationState(AgentStateWithStructuredResponsePydantic):
     structured_response: Optional[TestCoverage] = None
+
+
+class TestAnalysisState(AgentStateWithStructuredResponsePydantic):
+    structured_response: Optional[TestFileAnalysis] = None
