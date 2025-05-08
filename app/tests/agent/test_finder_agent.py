@@ -3,14 +3,14 @@ from typing import Annotated
 import pytest
 from langchain_core.tools import Tool
 
-from app.llm.agent.test_finder_agent import TestFinderAgent
+from app.llm.agent.finder_agent import TestFinderAgent
 from app.llm.model_factory import ModelFactory
 from app.schemas.model_factory import GeminiParams
 from app.core.setting import gemini_settings
 
 
 @pytest.mark.asyncio
-async def test_test_gen_agent():
+async def test_find_or_generate_vitest_file():
     agent = TestFinderAgent(
         model=await ModelFactory().load_llm(
             GeminiParams(api_key=gemini_settings.GEMINI_API_KEY)

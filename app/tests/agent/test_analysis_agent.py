@@ -2,7 +2,7 @@ import textwrap
 import pytest
 
 from app.core.setting import gemini_settings
-from app.llm.agent.test_analysis_agent import TestAnalysisAgent
+from app.llm.agent.analysis_agent import TestAnalysisAgent
 from app.llm.model_factory import ModelFactory
 from app.schemas.model_factory import GeminiParams
 from app.schemas.structured_output import TestFileAnalysis

@@ -1,58 +1,63 @@
 import textwrap
-from typing import List
+from typing import Optional
 from langchain_core.language_models import BaseChatModel
-from langchain_core.tools import BaseTool
 from langgraph.graph.graph import CompiledGraph
 
 from app.llm.agent.base import BaseAgentBuilder
-from app.prompts.test_finder_prompt import TestFinderPrompt
-from app.schemas.state import TestFinderState
-from app.schemas.structured_output import TestFile
+from app.prompts.improver_prompt import TestGenerationPrompt
+from app.schemas.state import TestGenState
+from app.schemas.structured_output import NewTests
 
 
-class TestFinderAgent(BaseAgentBuilder):
+class TestImproverAgent(BaseAgentBuilder):
     """
-    타겟 소스를 테스트하는 기존 테스트 코드를 찾거나 생성하고 이에 대한 에디터 객체를 반환하는 에이전트
+    커버리지 향상을 위해 추가 테스트를 생성하는 에이전트
     """
 
-    def __init__(
-        self,
-        model: BaseChatModel,
-        tools: List[BaseTool] = [],
-    ):
+    def __init__(self, model: BaseChatModel):
         super().__init__(
             model=model,
-            tools=tools,
-            tool_call_mode="multi_turn",
+            tools=[],
+            tool_call_mode="none",
         )
 
     def build(self) -> CompiledGraph:
         return self.create_agentic_graph(
-            state_schema=TestFinderState,
+            state_schema=TestGenState,
             llm_node=self.create_llm_node(),
-            output_node=self.create_output_node(TestFile),
+            output_node=self.create_output_node(NewTests),
         ).compile()
 
-    async def find_or_generate_vitest_file(
+    async def generate_vitest_test(
         self,
         source_file_name: str,
         source_file_content: str,
-        source_file_path: str,
-    ) -> TestFile:
+        test_file_name: str,
+        test_file_content: str,
+        code_coverage_report: Optional[str] = None,
+    ) -> NewTests:
         agent = self.build()
         response = await agent.ainvoke(
-            TestFinderState(
-                messages=TestFinderPrompt(
+            TestGenState(
+                messages=TestGenerationPrompt(
                     language="typescript",
                     source_file_name=source_file_name,
-                    source_file_content=source_file_content,
-                    source_file_path=source_file_path,
+                    source_file_numbered="\n".join(
+                        [
+                            f"{i+1}: {line}"
+                            for i, line in enumerate(source_file_content.splitlines())
+                        ]
+                    ),
+                    test_file_name=test_file_name,
+                    test_file=test_file_content,
                     testing_framework="vitest",
+                    code_coverage_report=str(code_coverage_report),
+                    max_tests=10,
                     additional_instructions_text=_get_additional_instructions(),
                 ).build()
             )
         )
-        return response["structured_response"]
+        return response["structured_response"].new_tests
 
 
 def _get_additional_instructions():

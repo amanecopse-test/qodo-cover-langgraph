@@ -3,7 +3,7 @@ from langchain_core.language_models import BaseChatModel
 from langgraph.graph.graph import CompiledGraph
 from langchain_core.tools import BaseTool
 from app.llm.agent.base import BaseAgentBuilder
-from app.prompts.test_validation_prompt import TestValidationPrompt
+from app.prompts.validation_prompt import TestValidationPrompt
 from app.schemas.state import TestValidationState
 from app.schemas.structured_output import TestCoverage
 

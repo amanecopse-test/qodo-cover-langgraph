@@ -3,7 +3,7 @@ from typing import Annotated
 import pytest
 from pydantic import BaseModel, Field
 
-from app.llm.agent.test_validation_agent import TestValidationAgent
+from app.llm.agent.validation_agent import TestValidationAgent
 from app.llm.model_factory import ModelFactory
 from app.schemas.model_factory import GeminiParams
 from app.core.setting import gemini_settings
@@ -19,7 +19,7 @@ class CoverageToolInput(BaseModel):
 
 
 @pytest.mark.asyncio
-async def test_test_validation_agent():
+async def test_validate_vitest():
     agent = TestValidationAgent(
         model=await ModelFactory().load_llm(
             GeminiParams(api_key=gemini_settings.GEMINI_API_KEY)

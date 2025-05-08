@@ -1,15 +1,15 @@
 import textwrap
 import pytest
 
-from app.llm.agent.test_gen_agent import TestGenAgent
+from app.llm.agent.improver_agent import TestImproverAgent
 from app.llm.model_factory import ModelFactory
 from app.schemas.model_factory import GeminiParams
 from app.core.setting import gemini_settings
 
 
 @pytest.mark.asyncio
-async def test_test_gen_agent():
-    agent = TestGenAgent(
+async def test_generate_vitest_test():
+    agent = TestImproverAgent(
         model=await ModelFactory().load_llm(
             GeminiParams(api_key=gemini_settings.GEMINI_API_KEY)
         )

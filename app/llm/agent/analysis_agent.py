@@ -1,9 +1,8 @@
-from typing import List
 from langchain_core.language_models import BaseChatModel
 from langgraph.graph.graph import CompiledGraph
 
 from app.llm.agent.base import BaseAgentBuilder
-from app.prompts.test_analysis_prompt import TestAnalysisPrompt
+from app.prompts.analysis_prompt import TestAnalysisPrompt
 from app.schemas.state import TestAnalysisState
 from app.schemas.structured_output import TestFileAnalysis
 
