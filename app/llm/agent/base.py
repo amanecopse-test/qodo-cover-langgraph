@@ -84,10 +84,7 @@ class BaseAgentBuilder(ABC):
             if len(state.messages) == 0:
                 raise Exception("No messages in state")
 
-            if (
-                "ToolException" in state.messages[-1].content
-                or state.messages[-1].status == "error"
-            ):
+            if _is_tool_message_error(state.messages[-1]):
                 return LLM_NODE
 
             if self.tool_call_mode == "none":
@@ -205,3 +202,9 @@ def _no_tool_calls_in_messages(state: AgentStateLike) -> bool:
         )
     )
     return prev_tool_message_count == 0
+
+
+def _is_tool_message_error(message: BaseMessage) -> bool:
+    if not isinstance(message, ToolMessage):
+        return False
+    return message.status == "error"
