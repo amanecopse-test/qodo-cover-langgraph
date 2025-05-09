@@ -140,6 +140,14 @@ class TestCoverage(BaseModel):
         description="The uncovered lines of the test file"
     )
 
+    def passed_test(self) -> bool:
+        return self.coverage_percent is not None and self.coverage_percent > 0
+
+    def improved(self, previous_coverage_percent: Optional[int]) -> bool:
+        if previous_coverage_percent is None:
+            return self.passed_test()
+        return self.passed_test() and self.coverage_percent > previous_coverage_percent
+
 
 class TestFileAnalysis(BaseModel):
     """Model for test file analysis.
