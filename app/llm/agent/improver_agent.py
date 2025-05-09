@@ -1,12 +1,12 @@
 import textwrap
-from typing import Optional
+from typing import List, Optional
 from langchain_core.language_models import BaseChatModel
 from langgraph.graph.graph import CompiledGraph
 
 from app.llm.agent.base import BaseAgentBuilder
 from app.prompts.improver_prompt import TestGenerationPrompt
-from app.schemas.state import TestGenState
-from app.schemas.structured_output import NewTests
+from app.schemas.state import TestImproverState
+from app.schemas.structured_output import FailedTestReport, NewTests
 
 
 class TestImproverAgent(BaseAgentBuilder):
@@ -23,7 +23,7 @@ class TestImproverAgent(BaseAgentBuilder):
 
     def build(self) -> CompiledGraph:
         return self.create_agentic_graph(
-            state_schema=TestGenState,
+            state_schema=TestImproverState,
             llm_node=self.create_llm_node(),
             output_node=self.create_output_node(NewTests),
         ).compile()
@@ -35,10 +35,13 @@ class TestImproverAgent(BaseAgentBuilder):
         test_file_name: str,
         test_file_content: str,
         code_coverage_report: Optional[str] = None,
+        failed_test_reports: List[FailedTestReport] = [],
     ) -> NewTests:
         agent = self.build()
+        failed_tests_section = _parse_failed_test_reports(failed_test_reports)
+
         response = await agent.ainvoke(
-            TestGenState(
+            TestImproverState(
                 messages=TestGenerationPrompt(
                     language="typescript",
                     source_file_name=source_file_name,
@@ -54,10 +57,22 @@ class TestImproverAgent(BaseAgentBuilder):
                     code_coverage_report=str(code_coverage_report),
                     max_tests=10,
                     additional_instructions_text=_get_additional_instructions(),
+                    failed_tests_section=failed_tests_section,
                 ).build()
             )
         )
         return response["structured_response"].new_tests
+
+
+def _parse_failed_test_reports(
+    failed_test_reports: List[FailedTestReport],
+) -> Optional[str]:
+    if not failed_test_reports and len(failed_test_reports) == 0:
+        return None
+
+    return "-----------\n".join(
+        [report.model_dump_json() for report in failed_test_reports]
+    )
 
 
 def _get_additional_instructions():

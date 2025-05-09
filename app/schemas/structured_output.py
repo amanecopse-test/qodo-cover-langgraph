@@ -181,3 +181,42 @@ class TestFailureAnalysis(BaseModel):
     failure_reason: str = Field(description="The reason why the test failed")
     explanation: str = Field(description="An explanation of the failure reason")
     suggestions: List[str] = Field(description="A list of suggestions to fix the test")
+
+
+class FailedTestReport(BaseModel):
+    analysis: TestFailureAnalysis = Field(description="The analysis of the failed test")
+    failed_single_test: SingleTest = Field(description="The single test that failed")
+
+
+class ImprovedResult(BaseModel):
+    """Model for ImprovedResult result.
+
+    Example:
+        ```python
+        improved_result = ImprovedResult(
+            coverage_percent=100,
+            source_file=SourceFile(
+                language="python",
+                name="source_file.py",
+                content="\\n".join([
+                    "def function(self):",
+                    "    return 1",
+                ]),
+            ),
+            test_file=TestFile(
+                language="python",
+                name="test_file.py",
+                content="\\n".join([
+                    "def test_function(self):",
+                    "    assert function(1) == 1",
+                ]),
+            ),
+        )
+        ```
+    """
+
+    coverage_percent: Optional[int] = Field(
+        description="The coverage percent of the improved result"
+    )
+    source_file: SourceFile = Field(description="The source file that is tested")
+    test_file: TestFile = Field(description="The test file that is improved")
