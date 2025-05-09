@@ -1,5 +1,5 @@
 import pytest
-from app.core.test_file_editor import SnapshotEditor
+from app.core.snapshot_editor import SnapshotEditor
 
 
 @pytest.fixture
@@ -17,7 +17,7 @@ describe('Sample test suite', () => {
 @pytest.fixture
 def vitest_template(sample_test_file):
     return SnapshotEditor(
-        test_file=sample_test_file,
+        test_file_content=sample_test_file,
         line_number_to_insert_imports_after=1,
         line_number_to_insert_tests_after=6,
         single_test_indent=2,
@@ -106,7 +106,7 @@ describe('Sample test suite', () => {
 
 def test_rollback(vitest_template):
     # Given
-    initial_test_file = vitest_template.test_file
+    initial_test_file = vitest_template.test_file_content
     additional_test = """it('should be rolled back', () => {
   expect(true).toBe(false)
 })"""
@@ -117,14 +117,14 @@ def test_rollback(vitest_template):
     vitest_template.rollback()
 
     # Then
-    assert vitest_template.test_file == initial_test_file
+    assert vitest_template.test_file_content == initial_test_file
     assert vitest_template.line_number_to_insert_imports_after == 1
     assert vitest_template.line_number_to_insert_tests_after == 6
 
 
 def test_multiple_rollbacks(vitest_template):
     # Given
-    initial_test_file = vitest_template.test_file
+    initial_test_file = vitest_template.test_file_content
     test1 = "it('test1', () => {})"
     test2 = "it('test2', () => {})"
     test3 = "it('test3', () => {})"
@@ -143,19 +143,19 @@ def test_multiple_rollbacks(vitest_template):
     vitest_template.rollback()
 
     # Then
-    assert vitest_template.test_file == initial_test_file
+    assert vitest_template.test_file_content == initial_test_file
     assert len(vitest_template.history) == 0
 
 
 def test_rollback_empty_history(vitest_template):
     # Given
-    initial_test_file = vitest_template.test_file
+    initial_test_file = vitest_template.test_file_content
 
     # When
     vitest_template.rollback()
 
     # Then
-    assert vitest_template.test_file == initial_test_file
+    assert vitest_template.test_file_content == initial_test_file
     assert len(vitest_template.history) == 0
 
 
