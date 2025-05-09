@@ -83,6 +83,7 @@ class TestFile(BaseModel):
                 "def test_example(self):",
                 "    assert True",
             ]),
+            path="src/test_file.py",
         )
         ```
     """
@@ -90,6 +91,30 @@ class TestFile(BaseModel):
     language: str = Field(description="The programming language of the test file")
     name: str = Field(description="The name of the test file")
     content: str = Field(description="The content of the test file")
+    path: str = Field(description="The path of the test file")
+
+
+class SourceFile(BaseModel):
+    """Model for a source file.
+
+    Example:
+        ```python
+        source_file = SourceFile(
+            language="python",
+            name="source_file.py",
+            content="\\n".join([
+                "def function(self):",
+                "    return 1",
+            ]),
+            path="src/source_file.py",
+        )
+        ```
+    """
+
+    language: str = Field(description="The programming language of the source file")
+    name: str = Field(description="The name of the source file")
+    content: str = Field(description="The content of the source file")
+    path: str = Field(description="The path of the source file")
 
 
 class TestCoverage(BaseModel):

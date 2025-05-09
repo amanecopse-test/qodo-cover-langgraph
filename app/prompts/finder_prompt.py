@@ -93,6 +93,7 @@ class TestFinderPrompt(PromptABC):
                     "  });",
                     "});",
                 ]),
+                path="src/test_file.py",
             )
             =========
             """

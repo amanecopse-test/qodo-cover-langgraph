@@ -7,6 +7,7 @@ from app.llm.agent.finder_agent import TestFinderAgent
 from app.llm.model_factory import ModelFactory
 from app.schemas.model_factory import GeminiParams
 from app.core.setting import gemini_settings
+from app.schemas.structured_output import TestFile
 
 
 @pytest.mark.asyncio
@@ -25,17 +26,18 @@ async def test_find_or_generate_vitest_file():
     )
     response = await agent.find_or_generate_vitest_file(
         source_file_name="button.tsx",
-        source_file_content=get_source_file(),
+        source_file_content=get_source_content(),
         source_file_path="src/components/Button.tsx",
     )
     print(response)
-    assert response.content == find_test_file(
-        source_file_path="src/components/Button.tsx"
+    assert (
+        response.content
+        == find_test_file(source_file_path="src/components/Button.tsx").content
     )
 
 
 def find_test_file(source_file_path: Annotated[str, "The path to the source file"]):
-    return textwrap.dedent(
+    content = textwrap.dedent(
         """
         import { render, renderWithSetup, screen } from 'shared-utils-test';
 
@@ -52,8 +54,15 @@ def find_test_file(source_file_path: Annotated[str, "The path to the source file
         """
     ).strip()
 
+    return TestFile(
+        language="typescript",
+        name="Button.test.tsx",
+        content=content,
+        path="src/components/Button.test.tsx",
+    )
 
-def get_source_file():
+
+def get_source_content():
     return textwrap.dedent(
         """
         import { forwardRef } from 'react';
